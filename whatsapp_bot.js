@@ -106,7 +106,12 @@ function getAutoResponse(messageBody) {
 // Função para enviar mensagens
 async function sendMessage(to, message) {
   try {
+    console.log('Tentando enviar mensagem para:', to);
+    console.log('Phone Number ID configurado:', PHONE_NUMBER_ID);
+    console.log('Token presente?', !!WHATSAPP_TOKEN);
+    
     const url = `https://graph.facebook.com/v18.0/${PHONE_NUMBER_ID}/messages`;
+    console.log('URL da API:', url);
     
     const data = {
       messaging_product: 'whatsapp',
@@ -116,6 +121,8 @@ async function sendMessage(to, message) {
         body: message
       }
     };
+    
+    console.log('Dados a enviar:', JSON.stringify(data, null, 2));
 
     const config = {
       headers: {
@@ -128,7 +135,9 @@ async function sendMessage(to, message) {
     console.log('Mensagem enviada com sucesso:', response.data);
     
   } catch (error) {
-    console.error('Erro ao enviar mensagem:', error.response?.data || error.message);
+    console.error('Erro ao enviar mensagem - Status:', error.response?.status);
+    console.error('Erro ao enviar mensagem - Detalhes:', JSON.stringify(error.response?.data, null, 2));
+    console.error('Erro ao enviar mensagem - Mensagem:', error.message);
   }
 }
 
