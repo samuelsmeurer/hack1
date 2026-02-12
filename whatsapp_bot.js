@@ -29,15 +29,22 @@ app.get('/webhook', (req, res) => {
 // Webhook para receber mensagens
 app.post('/webhook', (req, res) => {
   const body = req.body;
+  console.log('Webhook recebido:', JSON.stringify(body, null, 2));
 
   if (body.object === 'whatsapp_business_account') {
     body.entry?.forEach(entry => {
       const changes = entry.changes;
       changes?.forEach(change => {
         if (change.field === 'messages') {
-          const messages = change.value.messages;
+          const value = change.value;
+          const messages = value.messages;
+          const metadata = value.metadata;
+          
+          console.log('Phone Number ID do webhook:', metadata?.phone_number_id);
+          
           if (messages) {
             messages.forEach(message => {
+              console.log('Processando mensagem:', message);
               processMessage(message);
             });
           }
@@ -99,7 +106,7 @@ function getAutoResponse(messageBody) {
 // Função para enviar mensagens
 async function sendMessage(to, message) {
   try {
-    const url = `https://graph.facebook.com/v22.0/${PHONE_NUMBER_ID}/messages`;
+    const url = `https://graph.facebook.com/v18.0/${PHONE_NUMBER_ID}/messages`;
     
     const data = {
       messaging_product: 'whatsapp',
@@ -124,6 +131,16 @@ async function sendMessage(to, message) {
     console.error('Erro ao enviar mensagem:', error.response?.data || error.message);
   }
 }
+
+// Página inicial
+app.get('/', (req, res) => {
+  res.send(`
+    <h1>🤖 WhatsApp Bot</h1>
+    <p>Status: <strong>Online</strong></p>
+    <p>Webhook: <code>/webhook</code></p>
+    <p>Health: <code>/health</code></p>
+  `);
+});
 
 // Health check endpoint
 app.get('/health', (req, res) => {
